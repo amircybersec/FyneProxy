@@ -114,6 +114,9 @@ func makePageContent(ctx *AppContext, state *AppState, navChannel chan NavEvent)
 	case "settings":
 		fmt.Println("rendering the settings page")
 		return makeSettingsPageContent(ctx, navChannel)
+	case "testResult":
+		fmt.Println("rendering the test result page")
+		return makeTestResultPage(ctx, navChannel)
 	// Add more cases for different pages
 	default:
 		return widget.NewLabel("Page not found")
@@ -173,7 +176,7 @@ func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.Canvas
 			arrowIcon := widget.NewToolbarAction(theme.NavigateNextIcon(), func() {
 				log.Printf("Next icon clicked for item %v", i)
 				// navigate to page result for specific menu item
-				// indicator.FillColor = color.NRGBA{R: 0, G: 100, B: 0, A: 255}
+				navChannel <- NavEvent{TargetPage: "testResult"}
 				// Define action for the "+" icon
 			})
 
@@ -389,4 +392,23 @@ func parseInputText(clipboardContent string) ([]Config, error) {
 		}
 	}
 	return []Config{}, fmt.Errorf("failed to parse input")	
+}
+
+func makeTestResultPage(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasObject {
+	// Create the toolbar with back "<-" icon
+	headerToolbarLeft := widget.NewToolbar(
+		widget.NewToolbarAction(theme.NavigateBackIcon(), func() {
+			log.Println("Setting icon clicked")
+			navChannel <- NavEvent{TargetPage: "main"}
+			// myWindow.SetContent(makeSettingsPageContent())
+			// Define action for the "+" icon
+		}),
+	)
+	// Create empty toolbar 
+	headerToolbarRight := widget.NewToolbar()
+	header := makePageHeader("Test Result", headerToolbarLeft, headerToolbarRight)
+	// Combine the header and the accordions in a vertical box layout
+	return container.NewVBox(
+		header,
+	)
 }
