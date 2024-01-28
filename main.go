@@ -240,6 +240,8 @@ func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.Canvas
 
 	header := makePageHeader("Proxy App", headerToolbarLeft, headerToolbarRight)
 	buttonState := make(chan bool)
+	ConnectButton := widget.NewButton("Connect", func() {
+	})
 	TestButton := widget.NewButton("Test All", func() {
 		go func() {
 			// Disable the button and update text in the main goroutine
@@ -272,7 +274,8 @@ func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.Canvas
 	return container.NewVBox(
 		header,
 		listWithMaxHeight, // The scrollable list with enforced maximum height
-		TestButton,
+		container.New(layout.NewGridLayoutWithColumns(2), TestButton, ConnectButton),
+
 	)
 
 }
