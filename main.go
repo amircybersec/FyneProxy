@@ -29,6 +29,7 @@ type AppSettings struct {
 	Tcp bool `json:"tcp"`
 	Udp bool `json:"udp"`
 	ReporterURL string `json:"reporter"`
+	LocalAddress string `json:"localAddress"`
 	Configs []Config `json:"configs"`
 }
 
@@ -125,6 +126,7 @@ func makePageContent(ctx *AppContext, state *AppState, navChannel chan NavEvent)
 
 // makeMainPageContent creates the main page content
 func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.CanvasObject {
+	var selectedItemID int	
 	var list *widget.List
 
 	list = widget.NewList(
@@ -196,8 +198,9 @@ func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.Canvas
 		)
 
 	list.OnSelected = func(id widget.ListItemID) {
-		selectedItem := ctx.Settings.Configs[id].Transport
-		log.Printf("Selected Item: %s", selectedItem)
+		//selectedItem := ctx.Settings.Configs[id].Transport
+		log.Printf("Selected Item ID %v", selectedItemID)
+		selectedItemID = id
 	}
 	// list.OnUnselected = func(o fyne.CanvasObject) {
 	// }
@@ -239,9 +242,47 @@ func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.Canvas
 	)
 
 	header := makePageHeader("Proxy App", headerToolbarLeft, headerToolbarRight)
+	
+	ConnectButton := widget.NewButton("Connect", func() {})
+	ConnectButton.Importance = widget.HighImportance
+
+	statusBox := widget.NewLabel("")
+	statusBox.Wrapping = fyne.TextWrapWord
+
+	setProxyUI := func(proxy *runningProxy, err error) {
+		if proxy != nil {
+			statusBox.SetText("Proxy listening on " + proxy.Address)
+			ConnectButton.SetText("Stop")
+			ConnectButton.SetIcon(theme.MediaStopIcon())
+			return
+		}
+		if err != nil {
+			statusBox.SetText("❌ ERROR: " + err.Error())
+		} else {
+			statusBox.SetText("Proxy not running")
+		}
+		ConnectButton.SetText("Connect")
+		ConnectButton.SetIcon(theme.MediaPlayIcon())
+	}
+	var proxy *runningProxy
+	ConnectButton.OnTapped = func() {
+		log.Println(ConnectButton.Text)
+		var err error
+		if proxy == nil {
+			// Start proxy.
+			log.Printf("Starting proxy on %v", ctx.Settings.LocalAddress)
+			log.Printf("Using config: %v", ctx.Settings.Configs[selectedItemID].Transport)
+			proxy, err = runServer(ctx.Settings.LocalAddress, ctx.Settings.Configs[selectedItemID].Transport)
+		} else {
+			// Stop proxy
+			proxy.Close()
+			proxy = nil
+		}
+		setProxyUI(proxy, err)
+	}
+	setProxyUI(proxy, nil)
+
 	buttonState := make(chan bool)
-	ConnectButton := widget.NewButton("Connect", func() {
-	})
 	TestButton := widget.NewButton("Test All", func() {
 		go func() {
 			// Disable the button and update text in the main goroutine
@@ -270,12 +311,13 @@ func makeMainPageContent (ctx *AppContext, navChannel chan NavEvent) fyne.Canvas
 			}
 		}
 	}()
+
 	// Combine the header and the scrollable list in a vertical box layout
 	return container.NewVBox(
 		header,
 		listWithMaxHeight, // The scrollable list with enforced maximum height
 		container.New(layout.NewGridLayoutWithColumns(2), TestButton, ConnectButton),
-
+		statusBox,
 	)
 
 }
@@ -322,12 +364,20 @@ func makeSettingsPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.Can
 		checkTCP,
 	)
 
+	addressEntryLabel := widget.NewLabelWithStyle("Local address", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	addressEntry := widget.NewEntry()
+	addressEntry.SetPlaceHolder("Enter proxy local address")
+	if settings.LocalAddress == "" {
+		addressEntry.Text = "localhost:8080"
+	}
+
 	saveButton := widget.NewButton("Save", func() {
 		ctx.Settings.Domain = domainEntry.Text
 		ctx.Settings.DnsList = dnsEntry.Text
 		ctx.Settings.ReporterURL = reporterEntry.Text
 		ctx.Settings.Udp = checkUDP.Checked
 		ctx.Settings.Tcp = checkTCP.Checked
+		ctx.Settings.LocalAddress = addressEntry.Text
 		updateSettings(ctx)
 	})
 	saveButton.Importance = widget.HighImportance
@@ -354,6 +404,8 @@ func makeSettingsPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.Can
 		protocolSelect,
 		reporterLabel,
 		reporterEntry,
+		addressEntryLabel,
+		addressEntry,
 		saveButton,
 	)
 }
