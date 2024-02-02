@@ -1,11 +1,13 @@
 # FyneProxy
 Proxy App Written with Fyne Cross-Platform Framework in Go Land using Outline SDK capabilities
 
-<img width="280" alt="Screenshot 2024-01-29 at 1 51 37 AM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/3f986028-7955-427f-b862-e1c74edd2d3d">
+<img width="200" alt="Screenshot 2024-02-02 at 12 13 05 PM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/80d58af8-064c-4f3a-a8f5-54f0e5ccaafc">
 
-<img width="300" alt="Screenshot 2024-01-29 at 1 51 16 AM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/c9f023c0-a938-421c-a4fe-70ffd2867c81">
+<img width="200" alt="Screenshot 2024-02-02 at 12 13 22 PM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/483d4684-c38d-4720-9c58-c55a2f183518">
 
-<img width="300" alt="Screenshot 2024-01-29 at 1 51 11 AM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/b59d7a0b-4937-4812-9aa4-6449c415f687">
+<img width="200" alt="Screenshot 2024-02-02 at 12 15 59 PM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/821d3ac2-2c47-4f70-ad54-a125b1b6fc17">
+
+
 
 
 Remain Items (TODO):
