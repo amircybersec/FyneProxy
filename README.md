@@ -14,7 +14,7 @@ Remain Items (TODO):
 - Pull config list from HTTPS link
 - Batch import / paste comma seperated configs
 - Show individual test results for each config (udp/tcp/domain name/resolver permutations) as accordion on Test Result page
-- Add Connect button and enable it only if a certain config is selected
-- Connect to server and show "connected" on button and change its color
-- Add local proxy port to settings
-- Show [Popup](https://docs.fyne.io/api/v2.3/widget/popup.html) to report errors 
+- Enable Connect button only if the list is none empty and a certain config is selected
+- Show [Popup](https://docs.fyne.io/api/v2.3/widget/popup.html) to report errors
+- Add mechanism to setup system proxy automatically on desktop
+- Offer option in setting to listen on LAN
