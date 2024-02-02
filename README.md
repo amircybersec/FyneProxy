@@ -7,6 +7,8 @@ Proxy App Written with Fyne Cross-Platform Framework in Go Land using Outline SD
 
 <img width="200" alt="Screenshot 2024-02-02 at 12 15 59 PM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/821d3ac2-2c47-4f70-ad54-a125b1b6fc17">
 
+<img width="200" alt="Screenshot 2024-02-02 at 12 19 35 PM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/35150967-b63c-4d62-869d-302496928a4e">
+
 
 
 
@@ -18,3 +20,4 @@ Remain Items (TODO):
 - Show [Popup](https://docs.fyne.io/api/v2.3/widget/popup.html) to report errors
 - Add mechanism to setup system proxy automatically on desktop
 - Offer option in setting to listen on LAN
+- Releade app using Geoffrey
