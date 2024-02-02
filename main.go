@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2/app"
 )
 
+var selectedItemID int
+
 type AppState struct {
 	CurrentPage string
 }
@@ -49,7 +51,7 @@ func main() {
 	}
 	ProxyApp.Settings().SetTheme(newAppTheme())
 	mainWin := ProxyApp.NewWindow(ProxyApp.Metadata().Name)
-	mainWin.Resize(fyne.NewSize(400, 300))
+	mainWin.Resize(fyne.NewSize(200, 300))
 
 	log.Println("Setting the context")
 

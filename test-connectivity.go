@@ -38,21 +38,21 @@ var debugLog log.Logger = *log.New(io.Discard, "", 0)
 
 type connectivityReport struct {
 	// Inputs
-	Resolver string `json:"resolver"`
-	Proto    string `json:"proto"`
+	Resolver  string `json:"resolver"`
+	Proto     string `json:"proto"`
 	Transport string `json:"transport"`
 
 	// Observations
 	Time       time.Time  `json:"time"`
 	DurationMs int64      `json:"duration_ms"`
 	Error      *errorJSON `json:"error"`
-	Collected bool       `json:"collected"`
+	Collected  bool       `json:"collected"`
 }
 
 type errorJSON struct {
-	Op string `json:"op,omitempty"`
+	Op         string `json:"op,omitempty"`
 	PosixError string `json:"posix_error,omitempty"`
-	Msg string `json:"msg,omitempty"`
+	Msg        string `json:"msg,omitempty"`
 }
 
 func makeErrorRecord(result *connectivity.ConnectivityError) *errorJSON {
@@ -85,71 +85,79 @@ func (r connectivityReport) IsSuccess() bool {
 }
 
 func TestConfigs(setting *AppSettings) {
-	protocols := []string{"tcp", "udp"}
 	for i := range setting.Configs {
-		var healthly []bool
-		cnf := &setting.Configs[i]
-		c, err := config.SanitizeConfig(cnf.Transport)
-		if err != nil {
-			log.Fatalf("Failed to sanitize config: %v", err)
-		}
-		for _, resolverHost := range strings.Split(setting.DnsList, ",") {
-			resolverHost := strings.TrimSpace(resolverHost)
-			resolverAddress := net.JoinHostPort(resolverHost, "53")
-			for _, proto := range protocols {
-				var r connectivityReport
-				var resolver dns.Resolver
-				r.Transport = c
-				r.Resolver = resolverAddress
-				startTime := time.Now()
-				switch proto {
-				case "tcp":
-					streamDialer, err := config.NewStreamDialer(cnf.Transport)
-					r.Proto = "tcp"
-					log.Printf("testing for protocol: %v", r.Proto)
-					if err != nil {
-						log.Printf("Failed to create StreamDialer: %v", err)
-						r.Time = startTime.UTC().Truncate(time.Second)
-						r.DurationMs = time.Duration(0).Milliseconds()
-						r.Error = &errorJSON{Msg: err.Error()}
-						cnf.TestReports = append(cnf.TestReports, &r)
-						continue
-					}
-					resolver = dns.NewTCPResolver(streamDialer, resolverAddress)
-				case "udp":
-					packetDialer, err := config.NewPacketDialer(cnf.Transport)
-					r.Proto = "udp"
-					log.Printf("testing for protocol: %v", r.Proto)
-					if err != nil {
-						log.Printf("Failed to create StreamDialer: %v", err)
-						r.Time = startTime.UTC().Truncate(time.Second)
-						r.DurationMs = time.Duration(0).Milliseconds()
-						r.Error = &errorJSON{Msg: err.Error()}
-						cnf.TestReports = append(cnf.TestReports, &r)
-						continue
-					}
-					resolver = dns.NewUDPResolver(packetDialer, resolverAddress)
-				default:
-					log.Fatalf(`Invalid proto %v. Must be "tcp" or "udp"`, proto)
-				}
-				result, err := connectivity.TestConnectivityWithResolver(context.Background(), resolver, setting.Domain)
-				r.Time = startTime.UTC().Truncate(time.Second)
-				r.DurationMs = time.Duration(0).Milliseconds()
+		TestSingleConfig(setting, i)
+	}
+}
+
+func TestSingleConfig(setting *AppSettings, i int) {
+	protocols := []string{"tcp", "udp"}
+	var healthly []bool
+	// check if i is within the range of the slice
+	if i < 0 || i >= len(setting.Configs) {
+		log.Fatalf("Index %v is out of range", i)
+	}
+	cnf := &setting.Configs[i]
+	c, err := config.SanitizeConfig(cnf.Transport)
+	if err != nil {
+		log.Fatalf("Failed to sanitize config: %v", err)
+	}
+	for _, resolverHost := range strings.Split(setting.DnsList, ",") {
+		resolverHost := strings.TrimSpace(resolverHost)
+		resolverAddress := net.JoinHostPort(resolverHost, "53")
+		for _, proto := range protocols {
+			var r connectivityReport
+			var resolver dns.Resolver
+			r.Transport = c
+			r.Resolver = resolverAddress
+			startTime := time.Now()
+			switch proto {
+			case "tcp":
+				streamDialer, err := config.NewStreamDialer(cnf.Transport)
+				r.Proto = "tcp"
+				log.Printf("testing for protocol: %v", r.Proto)
 				if err != nil {
-					log.Fatalf("Connectivity test failed to run: %v", err)
+					log.Printf("Failed to create StreamDialer: %v", err)
+					r.Time = startTime.UTC().Truncate(time.Second)
+					r.DurationMs = time.Duration(0).Milliseconds()
 					r.Error = &errorJSON{Msg: err.Error()}
 					cnf.TestReports = append(cnf.TestReports, &r)
 					continue
 				}
-				r.Error = makeErrorRecord(result)
-				//log.Printf("Connectivity test result: %v", r)	
-				// collectReport(r, "")
-				cnf.TestReports = append(cnf.TestReports, &r)
-				healthly = append(healthly, r.IsSuccess())
+				resolver = dns.NewTCPResolver(streamDialer, resolverAddress)
+			case "udp":
+				packetDialer, err := config.NewPacketDialer(cnf.Transport)
+				r.Proto = "udp"
+				log.Printf("testing for protocol: %v", r.Proto)
+				if err != nil {
+					log.Printf("Failed to create StreamDialer: %v", err)
+					r.Time = startTime.UTC().Truncate(time.Second)
+					r.DurationMs = time.Duration(0).Milliseconds()
+					r.Error = &errorJSON{Msg: err.Error()}
+					cnf.TestReports = append(cnf.TestReports, &r)
+					continue
+				}
+				resolver = dns.NewUDPResolver(packetDialer, resolverAddress)
+			default:
+				log.Fatalf(`Invalid proto %v. Must be "tcp" or "udp"`, proto)
 			}
+			result, err := connectivity.TestConnectivityWithResolver(context.Background(), resolver, setting.Domain)
+			r.Time = startTime.UTC().Truncate(time.Second)
+			r.DurationMs = time.Duration(0).Milliseconds()
+			if err != nil {
+				log.Fatalf("Connectivity test failed to run: %v", err)
+				r.Error = &errorJSON{Msg: err.Error()}
+				cnf.TestReports = append(cnf.TestReports, &r)
+				continue
+			}
+			r.Error = makeErrorRecord(result)
+			//log.Printf("Connectivity test result: %v", r)
+			// collectReport(r, "")
+			cnf.TestReports = append(cnf.TestReports, &r)
+			healthly = append(healthly, r.IsSuccess())
 		}
-		cnf.Health = CheckHealth(healthly)
 	}
+	cnf.Health = CheckHealth(healthly)
 }
 
 func submitReports(setting *AppSettings) {
@@ -213,25 +221,25 @@ func collectReport(r report.Report, reporterURL string) error {
 // 3 if all elements are false (all tests have failed),
 // 2 if there is a mix of true and false (some have failed).
 func CheckHealth(slice []bool) int {
-    if len(slice) == 0 {
-        return 0
-    }
-    allTrue := true
-    allFalse := true
-    for _, value := range slice {
-        if value {
-            allFalse = false
-        } else {
-            allTrue = false
-        }
-        // Early exit if we already know there's a mix
-        if !allTrue && !allFalse {
-            return 2
-        }
-    }
+	if len(slice) == 0 {
+		return 0
+	}
+	allTrue := true
+	allFalse := true
+	for _, value := range slice {
+		if value {
+			allFalse = false
+		} else {
+			allTrue = false
+		}
+		// Early exit if we already know there's a mix
+		if !allTrue && !allFalse {
+			return 2
+		}
+	}
 
-    if allTrue {
-        return 1
-    }
-    return 3
+	if allTrue {
+		return 1
+	}
+	return 3
 }
