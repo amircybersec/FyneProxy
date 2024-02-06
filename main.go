@@ -49,7 +49,7 @@ func main() {
 	done := make(chan bool, 1)
 	safeClose(done)
 	log.Println("Setting the context")
-	ProxyApp := app.NewWithID("FyneProxyApp")
+	ProxyApp := app.NewWithID("com.amirgh.fyneproxy")
 	if meta := ProxyApp.Metadata(); meta.Name == "" {
 		// App not packaged, probably from `go run`.
 		meta.Name = "Proxy App"
