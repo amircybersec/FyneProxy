@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"log"
+	"net"
 	"net/url"
 
 	"fyne.io/fyne/v2"
@@ -202,12 +204,25 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		TestSingleConfig(ctx.Settings, selectedItemID)
 		list.Refresh()
 		var err error
+		systemProxy, err := GetSystemProxy()
+		if err != nil {
+			fmt.Println(err)
+		}
 		if proxy == nil {
 			// Start proxy.
 			log.Printf("Starting proxy on %v", ctx.Settings.LocalAddress)
 			log.Printf("Using config: %v", ctx.Settings.Configs[selectedItemID].Transport)
 			if ctx.Settings.Configs[selectedItemID].Health == 1 {
 				proxy, err = runServer(ctx.Settings.LocalAddress, ctx.Settings.Configs[selectedItemID].Transport)
+				host, port, err := net.SplitHostPort(ctx.Settings.LocalAddress)
+				if err != nil {
+					fmt.Println("failed to parse address: %w", err)
+				}
+				if err := systemProxy.SetProxy(host, port); err != nil {
+					fmt.Println("Error setting up proxy:", err)
+				} else {
+					fmt.Println("Proxy setup successful")
+				}
 			} else {
 				err = errors.New("could not connecto to remote destination")
 				proxy = nil
@@ -215,6 +230,11 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		} else {
 			// Stop proxy
 			proxy.Close()
+			if err := systemProxy.UnsetProxy(); err != nil {
+				fmt.Println("Error setting up proxy:", err)
+			} else {
+				fmt.Println("Proxy unset successful")
+			}
 			proxy = nil
 		}
 		setProxyUI(proxy, err)

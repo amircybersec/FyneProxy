@@ -2,7 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -42,6 +46,8 @@ type AppContext struct {
 }
 
 func main() {
+	done := make(chan bool, 1)
+	safeClose(done)
 	log.Println("Setting the context")
 	ProxyApp := app.NewWithID("FyneProxyApp")
 	if meta := ProxyApp.Metadata(); meta.Name == "" {
@@ -82,6 +88,11 @@ func main() {
 	// Set initial content
 	mainWin.SetContent(makePageContent(ctx, state, navChannel))
 	mainWin.ShowAndRun()
+
+	fmt.Println("awaiting signal")
+	// The program blocks here waiting for the signal
+	<-done
+	fmt.Println("exiting")
 }
 
 func loadSettings(ctx *AppContext) {
@@ -106,4 +117,30 @@ func updateSettings(ctx *AppContext) {
 	}
 	// Save JSON string to app preferences
 	ctx.Preferences.SetString("AppSettings", string(settingsJSON))
+}
+
+func safeClose(done chan bool) {
+	// Setting up a channel to listen for signals
+	sigs := make(chan os.Signal, 1)
+	// Channel to indicate the program can stop
+	// Register the channel to receive notifications of the specified signals
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	// Start a goroutine to handle the signals
+	// This goroutine executes a blocking receive for signals
+	go func() {
+		sig := <-sigs
+		fmt.Println()
+		fmt.Println(sig)
+		// Here you can call your cleanup or exit function
+		systemProxy, err := GetSystemProxy()
+		if err != nil {
+			fmt.Println(err)
+		}
+		if err := systemProxy.UnsetProxy(); err != nil {
+			fmt.Println("Error setting up proxy:", err)
+		} else {
+			fmt.Println("Proxy unset successful")
+		}
+		done <- true
+	}()
 }
