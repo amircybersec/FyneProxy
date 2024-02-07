@@ -14,14 +14,14 @@ The goal is to support desktop platforms first (Linux, MacOS, Windows) and imppr
 
 TODO:
 
-- Pull config list from HTTPS link
-- Show popup when + is pressed and text entry field and paste button
-- Batch import / paste comma seperated configs
-- Show individual test results for each config (udp/tcp/domain name/resolver permutations) as accordion on Test Result page
-- Enable Connect button only if the list is none empty and a certain config is selected
-- Show [Popup](https://docs.fyne.io/api/v2.3/widget/popup.html) to report general app errors
-- Setup system proxy automatically on Windows and Linux
-- Add full VPN support on Linux based on Outline CLI
-- Offer options in setting to listen on LAN (share tunnel with others)
-- Releade app using Geoffrey
-- add [system tray](https://docs.fyne.io/explore/systray)
+- [x] Pull config list from HTTPS link
+- [ ] fix issues with preserving UI state (e.g. button state) when switching between pages/views
+- [x] Show popup when + is pressed and text entry field and paste button
+- [ ] Show individual test results for each config (udp/tcp/domain name/resolver permutations) as accordion on Test Result page
+- [ ] Enable Connect button only if the list is none empty and a certain config is selected
+- [ ] Show [Popup](https://docs.fyne.io/api/v2.3/widget/popup.html) to report general app errors
+- [ ] Setup system proxy automatically on Windows and Linux
+- [ ] Add full VPN support on Linux based on Outline CLI
+- [ ] Offer options in setting to listen on LAN (share tunnel with others)
+- [ ] Releade app using Geoffrey
+- [ ] Add [system tray](https://docs.fyne.io/explore/systray)

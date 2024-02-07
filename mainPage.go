@@ -143,21 +143,45 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 	// Use container.Max to allocate as much space as possible to the list
 	listWithMaxHeight := container.NewStack(scrollContainer)
 
+	// addConfig := func(ctx *AppContext) {
+	// 	log.Println("Add icon clicked")
+	// 	// Define action for the "+" icon
+	// 	c := ctx.Window.Clipboard().Content()
+	// 	// process clipboard content
+	// 	configURLs, err := parseInputText(c)
+	// 	if err == nil {
+	// 		ctx.Settings.Configs = append(ctx.Settings.Configs, configURLs...)
+	// 		updateSettings(ctx)
+	// 	} else {
+	// 		log.Println("Error parsing clipboard content:", err)
+	// 	}
+	// }
+
 	// Create the toolbar with a "+" icon
 	headerToolbarRight := widget.NewToolbar(
 		widget.NewToolbarAction(theme.ContentAddIcon(), func() {
-			log.Println("Add icon clicked")
-			// Define action for the "+" icon
-			c := ctx.Window.Clipboard().Content()
-			// process clipboard content
-			configURLs, err := parseInputText(c)
-			if err == nil {
-				ctx.Settings.Configs = append(ctx.Settings.Configs, configURLs...)
-				updateSettings(ctx)
-			} else {
-				log.Println("Error parsing clipboard content:", err)
-			}
-			list.Refresh()
+			//addConfig(ctx)
+			//name := widget.NewEntry()
+			//name.SetPlaceHolder("Give it a name (optional)")
+			inputURL := widget.NewEntry()
+			inputURL.SetPlaceHolder("Enter config here")
+			paste := widget.NewToolbar(widget.NewToolbarAction(theme.ContentPasteIcon(), func() {
+				c := ctx.Window.Clipboard().Content()
+				inputURL.SetText(c)
+			}))
+			content := container.NewVBox(inputURL, paste)
+			dialog.ShowCustomConfirm("Add Config", "Add", "Cancel", content, func(confirm bool) {
+				if confirm {
+					configURLs, err := parseInputText(inputURL.Text)
+					if err == nil {
+						ctx.Settings.Configs = append(ctx.Settings.Configs, configURLs...)
+						updateSettings(ctx)
+					} else {
+						log.Println("Error parsing clipboard content:", err)
+					}
+					list.Refresh()
+				}
+			}, ctx.Window)
 		}),
 	)
 

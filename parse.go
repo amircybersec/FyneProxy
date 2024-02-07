@@ -15,7 +15,16 @@ func parseInputText(clipboardContent string) ([]Config, error) {
 			return []Config{{Transport: u.String()}}, nil
 		case "https":
 			// fetch list from remote config
-			return []Config{}, fmt.Errorf("not implemented yet")
+			var c []Config
+			configStrings, err := getDynamicConfig(u.String())
+			if err != nil {
+				return []Config{}, err
+			}
+			for _, configString := range configStrings {
+				c = append(c, Config{Transport: configString, Health: 0, TestReports: []*connectivityReport{}})
+			}
+			fmt.Printf("Parsed %d configs from remote url\n", len(c))
+			return c, nil
 		case "http":
 			// reject url due to security issue
 			return []Config{}, fmt.Errorf("not implemented yet")
