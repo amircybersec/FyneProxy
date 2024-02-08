@@ -45,6 +45,8 @@ type AppContext struct {
 	Settings    *AppSettings
 }
 
+var proxy *runningProxy
+
 func main() {
 	done := make(chan bool, 1)
 	safeClose(done)

@@ -222,7 +222,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		ConnectButton.SetText("Connect")
 		ConnectButton.SetIcon(theme.MediaPlayIcon())
 	}
-	var proxy *runningProxy
+
 	ConnectButton.OnTapped = func() {
 		log.Println(ConnectButton.Text)
 		TestSingleConfig(ctx.Settings, selectedItemID)
@@ -238,6 +238,10 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 			log.Printf("Using config: %v", ctx.Settings.Configs[selectedItemID].Transport)
 			if ctx.Settings.Configs[selectedItemID].Health == 1 {
 				proxy, err = runServer(ctx.Settings.LocalAddress, ctx.Settings.Configs[selectedItemID].Transport)
+				if err != nil {
+					// show error in GUI / Handle error
+					fmt.Println("Error starting proxy:", err)
+				}
 				host, port, err := net.SplitHostPort(ctx.Settings.LocalAddress)
 				if err != nil {
 					fmt.Println("failed to parse address: %w", err)
@@ -248,7 +252,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 					fmt.Println("Proxy setup successful")
 				}
 			} else {
-				err = errors.New("could not connecto to remote destination")
+				err = errors.New("could not connect to remote destination")
 				proxy = nil
 			}
 		} else {
