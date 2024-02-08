@@ -1,3 +1,5 @@
+//go:build windows
+
 package main
 
 import (
@@ -41,7 +43,7 @@ func resetWininetProxySettings() error {
 	}
 }
 
-func setProxyWindows(ip string, port string) error {
+func SetProxy(ip string, port string) error {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Internet Settings`, registry.SET_VALUE)
 	if err != nil {
 		return err
@@ -79,7 +81,7 @@ func setProxyWindows(ip string, port string) error {
 	return nil
 }
 
-func unsetProxyWindows() error {
+func UnsetProxy() error {
 	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Internet Settings`, registry.SET_VALUE)
 	if err != nil {
 		return err

@@ -228,7 +228,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		TestSingleConfig(ctx.Settings, selectedItemID)
 		list.Refresh()
 		var err error
-		systemProxy, err := GetSystemProxy()
+		//systemProxy, err := GetSystemProxy()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -246,7 +246,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 				if err != nil {
 					fmt.Println("failed to parse address: %w", err)
 				}
-				if err := systemProxy.SetProxy(host, port); err != nil {
+				if err := SetProxy(host, port); err != nil {
 					fmt.Println("Error setting up proxy:", err)
 				} else {
 					fmt.Println("Proxy setup successful")
@@ -258,7 +258,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		} else {
 			// Stop proxy
 			proxy.Close()
-			if err := systemProxy.UnsetProxy(); err != nil {
+			if err := UnsetProxy(); err != nil {
 				fmt.Println("Error setting up proxy:", err)
 			} else {
 				fmt.Println("Proxy unset successful")

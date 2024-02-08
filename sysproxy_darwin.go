@@ -1,38 +1,15 @@
+//go:build darwin
+
 package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os/exec"
-	"runtime"
 	"strings"
 )
 
-// Define an interface for system proxy settings
-type SystemProxy interface {
-	SetProxy(ip string, port string) error
-	UnsetProxy() error
-}
-
-// Implement SystemProxy for Linux
-type LinuxSystemProxy struct{}
-
-func (p LinuxSystemProxy) SetProxy(ip string, port string) error {
-	// Execute Linux specific commands to set proxy
-	// Example: exec.Command("gsettings", "set", "org.gnome.system.proxy.http", "host", ip).Run()
-	return nil
-}
-
-func (p LinuxSystemProxy) UnsetProxy() error {
-	// Execute Linux specific commands to unset proxy
-	return nil
-}
-
-// Implement SystemProxy for Darwin (macOS)
-type DarwinSystemProxy struct{}
-
-func (p DarwinSystemProxy) SetProxy(ip string, port string) error {
+func SetProxy(ip string, port string) error {
 	// Execute macOS specific commands to set proxy
 	// Get the active network interface
 	activeInterface, err := getActiveNetworkInterfaceMacOS()
@@ -51,7 +28,7 @@ func (p DarwinSystemProxy) SetProxy(ip string, port string) error {
 	return nil
 }
 
-func (p DarwinSystemProxy) UnsetProxy() error {
+func UnsetProxy() error {
 	// Execute macOS specific commands to unset proxy
 	// Get the active network interface
 	activeInterface, err := getActiveNetworkInterfaceMacOS()
@@ -67,19 +44,6 @@ func (p DarwinSystemProxy) UnsetProxy() error {
 		return err
 	}
 
-	return nil
-}
-
-// Implement SystemProxy for Windows
-type WindowsSystemProxy struct{}
-
-func (p WindowsSystemProxy) SetProxy(ip string, port string) error {
-	// Execute Windows specific commands or registry operations to set proxy
-	return nil
-}
-
-func (p WindowsSystemProxy) UnsetProxy() error {
-	// Execute Windows specific commands or registry operations to unset proxy
 	return nil
 }
 
@@ -135,47 +99,3 @@ func removeProxyMacOS(proxyType string, interfaceName string) error {
 	}
 	return nil
 }
-
-// detectPlatform returns a string representing the detected platform.
-func detectPlatform() string {
-	os := runtime.GOOS
-	arch := runtime.GOARCH
-
-	switch os {
-	case "darwin":
-		return "darwin"
-	case "linux":
-		return "linux"
-	case "windows":
-		if arch == "amd64" {
-			return "win64"
-		} else if arch == "386" {
-			return "win32"
-		}
-	}
-
-	return "unknown"
-}
-
-// Factory function to get the appropriate SystemProxy implementation
-func GetSystemProxy() (SystemProxy, error) {
-	switch detectPlatform() {
-	case "darwin":
-		return DarwinSystemProxy{}, nil
-	case "linux":
-		return LinuxSystemProxy{}, nil
-	case "win64":
-		return WindowsSystemProxy{}, nil
-	default:
-		return nil, errors.New("unknown or unsupported OS")
-	}
-}
-
-// func main() {
-//     // Example usage
-//     if err := setupProxyMacOS("127.0.0.1", "8080"); err != nil {
-//         fmt.Println("Error setting up proxy:", err)
-//     } else {
-//         fmt.Println("Proxy setup successful")
-//     }
-// }

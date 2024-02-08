@@ -134,11 +134,7 @@ func safeClose(done chan bool) {
 		fmt.Println()
 		fmt.Println(sig)
 		// Here you can call your cleanup or exit function
-		systemProxy, err := GetSystemProxy()
-		if err != nil {
-			fmt.Println(err)
-		}
-		if err := systemProxy.UnsetProxy(); err != nil {
+		if err := UnsetProxy(); err != nil {
 			fmt.Println("Error setting up proxy:", err)
 		} else {
 			fmt.Println("Proxy unset successful")
