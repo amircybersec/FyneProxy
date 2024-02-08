@@ -15,7 +15,13 @@ The goal is to support desktop platforms first (Linux, MacOS, Windows) and imppr
 TODO:
 
 - [x] Pull config list from HTTPS link
-- [ ] fix issues with preserving UI state (e.g. button state) when switching between pages/views
+- [ ] Add App icon
+- [ ] Fix issue with UPD and TCP flags in settings set to False in the first run
+- [ ] Set config name to Fragment value if it exists, otherwise default to hostname:port naming
+- [ ] Allow user to change config name
+- [ ] Fix issue with local address being empty and saved correctly
+- [ ] Print Test progress on Status section (Testing config x, Collecting report ...)
+- [ ] Fix issues with preserving UI state (e.g. button state) when switching between pages/views
 - [x] Show popup when + is pressed and text entry field and paste button
 - [ ] Show individual test results for each config (udp/tcp/domain name/resolver permutations) as accordion on Test Result page
 - [ ] Enable Connect button only if the list is none empty and a certain config is selected
@@ -25,3 +31,4 @@ TODO:
 - [ ] Offer options in setting to listen on LAN (share tunnel with others)
 - [ ] Releade app using Geoffrey
 - [ ] Add [system tray](https://docs.fyne.io/explore/systray)
+- [ ] run HTTP server and serve a simple web page with connection intructions
