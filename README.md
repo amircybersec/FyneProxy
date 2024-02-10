@@ -32,3 +32,4 @@ TODO:
 - [ ] Releade app using Geoffrey
 - [ ] Add [system tray](https://docs.fyne.io/explore/systray)
 - [ ] run HTTP server and serve a simple web page with connection intructions
+- [ ] Add support for KDE desktop, linux terminal, etc [ref](https://github.com/himanshub16/ProxyMan)
