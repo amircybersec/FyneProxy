@@ -1,4 +1,5 @@
 [Details]
+  Icon = "AppIcon.png"
   Name = "FyneProxy"
   ID = "com.amirgh.fyneproxy"
   Build = 1
