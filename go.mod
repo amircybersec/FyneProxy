@@ -1,7 +1,5 @@
 module FyneProxy
 
-go 1.21.6
-
 require (
 	fyne.io/fyne/v2 v2.4.3
 	github.com/Jigsaw-Code/outline-sdk v0.0.12
