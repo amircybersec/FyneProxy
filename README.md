@@ -16,6 +16,7 @@ TODO:
 
 - [x] Pull config list from HTTPS link
 - [ ] Add App icon
+- [ ] Add/Edit server name
 - [ ] Fix issue with UPD and TCP flags in settings set to False in the first run
 - [ ] Set config name to Fragment value if it exists, otherwise default to hostname:port naming
 - [ ] Allow user to change config name
@@ -33,3 +34,5 @@ TODO:
 - [ ] Add [system tray](https://docs.fyne.io/explore/systray)
 - [ ] run HTTP server and serve a simple web page with connection intructions
 - [ ] Add support for KDE desktop, linux terminal, etc [ref](https://github.com/himanshub16/ProxyMan)
+- [ ] Increment port if another server is running on that port and save that to the settings
+- [ ] Show connected devices IP addresses in share mode
