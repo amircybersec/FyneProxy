@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -14,20 +17,12 @@ import (
 func makeSettingsPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasObject {
 	settings := ctx.Settings
 	domainEntry := widget.NewEntry()
-	if settings.Domain != "" {
-		domainEntry.Text = settings.Domain
-	} else {
-		domainEntry.Text = "example.com"
-	}
-	domainLabel := widget.NewRichTextFromMarkdown("**Domain**")
+	domainEntry.Text = settings.Domain
 
+	domainLabel := widget.NewRichTextFromMarkdown("**Domain**")
 	dnsEntry := widget.NewMultiLineEntry()
 	dnsEntry.Wrapping = fyne.TextWrapBreak
-	if settings.DnsList != "" {
-		dnsEntry.Text = settings.DnsList
-	} else {
-		dnsEntry.Text = "8.8.8.8"
-	}
+	dnsEntry.Text = settings.ResolverHost
 
 	dnsLabel := widget.NewRichTextFromMarkdown("**Resolvers** ([format](https://pkg.go.dev/github.com/Jigsaw-Code/outline-sdk/x/config#hdr-Config_Format))")
 
@@ -54,14 +49,30 @@ func makeSettingsPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.Can
 
 	addressEntryLabel := widget.NewLabelWithStyle("Local address", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	addressEntry := widget.NewEntry()
-	addressEntry.SetPlaceHolder("Enter proxy local address")
-	if settings.LocalAddress == "" {
-		addressEntry.Text = "localhost:8080"
+	// Validator function
+	addressEntry.Validator = func(s string) error {
+		host, port, err := net.SplitHostPort(s)
+		if err != nil {
+			return fmt.Errorf("input must be in hostname:port format")
+		}
+
+		// Optionally validate the hostname and port
+		if _, err := net.LookupHost(host); err != nil {
+			return fmt.Errorf("invalid hostname")
+		}
+
+		if p, err := strconv.Atoi(port); err != nil || p < 1 || p > 65535 {
+			return fmt.Errorf("invalid port")
+		}
+
+		return nil
 	}
+	addressEntry.SetPlaceHolder("Enter proxy local address")
+	addressEntry.Text = settings.LocalAddress
 
 	saveButton := widget.NewButton("Save", func() {
 		ctx.Settings.Domain = domainEntry.Text
-		ctx.Settings.DnsList = dnsEntry.Text
+		ctx.Settings.ResolverHost = dnsEntry.Text
 		ctx.Settings.ReporterURL = reporterEntry.Text
 		ctx.Settings.Udp = checkUDP.Checked
 		ctx.Settings.Tcp = checkTCP.Checked
