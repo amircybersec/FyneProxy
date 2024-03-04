@@ -15,7 +15,7 @@ The goal is to support desktop platforms first (Linux, MacOS, Windows) and imppr
 TODO:
 
 - [x] Pull config list from HTTPS link
-- [ ] Add App icon
+- [x] Add App icon
 - [ ] Add/Edit server name
 - [ ] Fix issue with UPD and TCP flags in settings set to False in the first run
 - [ ] Set config name to Fragment value if it exists, otherwise default to hostname:port naming
@@ -36,3 +36,5 @@ TODO:
 - [ ] Add support for KDE desktop, linux terminal, etc [ref](https://github.com/himanshub16/ProxyMan)
 - [ ] Increment port if another server is running on that port and save that to the settings
 - [ ] Show connected devices IP addresses in share mode
+- [ ] If connectivity test passes, do a speed test afterwards
+- [ ] Add test timing to test results (duration)
