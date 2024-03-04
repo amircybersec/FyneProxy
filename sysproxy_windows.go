@@ -31,14 +31,18 @@ func InternetSetOption(hInternet uintptr, dwOption int, lpBuffer uintptr, dwBuff
 }
 
 func resetWininetProxySettings() error {
+	// https://learn.microsoft.com/en-us/windows/win32/wininet/option-flags
+	// INTERNET_OPTION_SETTINGS_CHANGED: 39
+	// Notifies the system that the registry settings have been changed so that it verifies the settings on the next call to InternetConnect.
+	// INTERNET_OPTION_REFRESH: 37
+	// Causes the proxy data to be reread from the registry for a handle. No buffer is required.
+	// This option can be used on the HINTERNET handle returned by InternetOpen.
 	result1 := InternetSetOption(0, INTERNET_OPTION_SETTINGS_CHANGED, 0, 0)
 	result2 := InternetSetOption(0, INTERNET_OPTION_REFRESH, 0, 0)
 
 	if result1 && result2 {
-		fmt.Println("Operation successful")
 		return nil
 	} else {
-		fmt.Println("Operation failed")
 		return errors.New("Wininet setting change operation failed")
 	}
 }

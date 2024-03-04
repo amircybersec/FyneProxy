@@ -67,16 +67,7 @@ func setProxyMacOS(proxyType string, interfaceName string, ip string, port strin
 	} else {
 		return fmt.Errorf("unknown proxy type: %s", proxyType)
 	}
-
-	cmd := exec.Command("bash", "-c", cmdStr)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("%v: %s", err, stderr.String())
-	}
-	return nil
+	return runCommand(cmdStr)
 }
 
 func removeProxyMacOS(proxyType string, interfaceName string) error {
@@ -88,7 +79,10 @@ func removeProxyMacOS(proxyType string, interfaceName string) error {
 	} else {
 		return fmt.Errorf("unknown proxy type: %s", proxyType)
 	}
+	return runCommand(cmdStr)
+}
 
+func runCommand(cmdStr string) error {
 	cmd := exec.Command("bash", "-c", cmdStr)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
