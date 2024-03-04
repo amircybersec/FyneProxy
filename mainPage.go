@@ -279,7 +279,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 			TestConfigs(ctx.Settings)
 			updateSettings(ctx)
 			log.Printf("Test reports: %v", ctx.Settings.Configs)
-			submitReports(ctx.Settings)
+			go submitReports(ctx.Settings)
 			list.Refresh()
 
 			// Re-enable the button and reset text in the main goroutine

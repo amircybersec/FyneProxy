@@ -2,11 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -24,7 +20,7 @@ type NavEvent struct {
 
 type AppSettings struct {
 	Domain       string   `json:"domain"`
-	DnsList      string   `json:"dnsList"`
+	ResolverHost string   `json:"resolverHost"`
 	Tcp          bool     `json:"tcp"`
 	Udp          bool     `json:"udp"`
 	ReporterURL  string   `json:"reporter"`
@@ -48,15 +44,14 @@ type AppContext struct {
 var proxy *runningProxy
 
 func main() {
-	done := make(chan bool, 1)
-	safeClose(done)
-	log.Println("Setting the context")
+	defer UnsetProxy()
 	ProxyApp := app.NewWithID("com.amirgh.fyneproxy")
 	if meta := ProxyApp.Metadata(); meta.Name == "" {
 		// App not packaged, probably from `go run`.
 		meta.Name = "Proxy App"
 		app.SetMetadata(meta)
 	}
+
 	ProxyApp.Settings().SetTheme(newAppTheme())
 	mainWin := ProxyApp.NewWindow(ProxyApp.Metadata().Name)
 	mainWin.Resize(fyne.NewSize(200, 300))
@@ -70,6 +65,7 @@ func main() {
 	}
 	// Load settings from preferences
 	loadSettings(ctx)
+	printSettings(ctx)
 
 	// State variable
 	state := &AppState{CurrentPage: "main"}
@@ -91,10 +87,6 @@ func main() {
 	mainWin.SetContent(makePageContent(ctx, state, navChannel))
 	mainWin.ShowAndRun()
 
-	fmt.Println("awaiting signal")
-	// The program blocks here waiting for the signal
-	<-done
-	fmt.Println("exiting")
 }
 
 func loadSettings(ctx *AppContext) {
@@ -107,6 +99,15 @@ func loadSettings(ctx *AppContext) {
 			log.Println("Error loading settings:", err)
 		}
 		ctx.Settings = &settings
+	} else {
+		// Set default settings if no saved settings are found
+		ctx.Settings = &AppSettings{
+			Domain:       "example.com",
+			ResolverHost: "8.8.8.8",
+			Tcp:          true,
+			Udp:          true,
+			LocalAddress: "localhost:8080",
+		}
 	}
 }
 
@@ -114,31 +115,19 @@ func updateSettings(ctx *AppContext) {
 	// Serialize settings to JSON
 	settingsJSON, err := json.Marshal(ctx.Settings)
 	if err != nil {
-		log.Println("Error saving settings:", err)
+		log.Println("Error marshaling settings:", err)
 		return
 	}
 	// Save JSON string to app preferences
 	ctx.Preferences.SetString("AppSettings", string(settingsJSON))
 }
 
-func safeClose(done chan bool) {
-	// Setting up a channel to listen for signals
-	sigs := make(chan os.Signal, 1)
-	// Channel to indicate the program can stop
-	// Register the channel to receive notifications of the specified signals
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	// Start a goroutine to handle the signals
-	// This goroutine executes a blocking receive for signals
-	go func() {
-		sig := <-sigs
-		fmt.Println()
-		fmt.Println(sig)
-		// Here you can call your cleanup or exit function
-		if err := UnsetProxy(); err != nil {
-			fmt.Println("Error setting up proxy:", err)
-		} else {
-			fmt.Println("Proxy unset successful")
-		}
-		done <- true
-	}()
+func printSettings(ctx *AppContext) {
+	// Serialize settings to JSON
+	settingsJSON, err := json.Marshal(ctx.Settings)
+	if err != nil {
+		log.Println("Error marshaling settings:", err)
+		return
+	}
+	log.Printf("Settings: %v", string(settingsJSON))
 }
