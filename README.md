@@ -1,6 +1,6 @@
-# FyneProxy
+# Blazer Proxy
 
-Proxy App Written with Fyne Cross-Platform Framework in Go Land using Outline SDK capabilities
+Blazer Proxy App Written with Fyne Cross-Platform Framework in Go Land using Outline SDK capabilities
 
 <img width="200" alt="Screenshot 2024-02-02 at 12 13 05 PM" src="https://github.com/amircybersec/FyneProxy/assets/117060873/80d58af8-064c-4f3a-a8f5-54f0e5ccaafc">
 
