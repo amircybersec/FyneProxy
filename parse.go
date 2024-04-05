@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 func parseInputText(clipboardContent string) ([]Config, error) {
-	u, err := url.Parse(clipboardContent)
+	u, err := url.Parse(strings.TrimSpace(clipboardContent))
 	// if parse is successful, check the schema
 	if err == nil {
 		switch u.Scheme {
