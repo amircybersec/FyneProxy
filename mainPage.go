@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/Jigsaw-Code/outline-sdk/x/sysproxy"
 )
 
 // customProgressBar extends widget.ProgressBar to set a custom minimum size.
@@ -229,9 +230,9 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		list.Refresh()
 		var err error
 		//systemProxy, err := GetSystemProxy()
-		if err != nil {
-			fmt.Println(err)
-		}
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
 		if proxy == nil {
 			// Start proxy.
 			log.Printf("Starting proxy on %v", ctx.Settings.LocalAddress)
@@ -239,14 +240,14 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 			if ctx.Settings.Configs[selectedItemID].Health == 1 {
 				proxy, err = runServer(ctx.Settings.LocalAddress, ctx.Settings.Configs[selectedItemID].Transport)
 				if err != nil {
-					// show error in GUI / Handle error
+					// TODO: show error in GUI / Handle error
 					fmt.Println("Error starting proxy:", err)
 				}
 				host, port, err := net.SplitHostPort(ctx.Settings.LocalAddress)
 				if err != nil {
 					fmt.Println("failed to parse address: %w", err)
 				}
-				if err := SetProxy(host, port); err != nil {
+				if err := sysproxy.SetWebProxy(host, port); err != nil {
 					fmt.Println("Error setting up proxy:", err)
 				} else {
 					fmt.Println("Proxy setup successful")
@@ -258,7 +259,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 		} else {
 			// Stop proxy
 			proxy.Close()
-			if err := UnsetProxy(); err != nil {
+			if err := sysproxy.DisableWebProxy(); err != nil {
 				fmt.Println("Error setting up proxy:", err)
 			} else {
 				fmt.Println("Proxy unset successful")
