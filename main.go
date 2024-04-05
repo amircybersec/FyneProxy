@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"github.com/Jigsaw-Code/outline-sdk/x/sysproxy"
 )
 
 var selectedItemID int
@@ -30,6 +31,7 @@ type AppSettings struct {
 
 type Config struct {
 	Transport   string                `json:"transport"`
+	ConfigFile  []byte                `json:"configFile"`
 	TestReports []*connectivityReport `json:"testReport"`
 	Health      int                   `json:"health"`
 }
@@ -44,7 +46,7 @@ type AppContext struct {
 var proxy *runningProxy
 
 func main() {
-	defer UnsetProxy()
+	defer sysproxy.DisableWebProxy()
 	ProxyApp := app.NewWithID("com.amirgh.fyneproxy")
 	if meta := ProxyApp.Metadata(); meta.Name == "" {
 		// App not packaged, probably from `go run`.
