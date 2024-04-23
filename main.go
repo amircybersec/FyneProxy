@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net/url"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -20,13 +21,16 @@ type NavEvent struct {
 }
 
 type AppSettings struct {
-	Domain       string   `json:"domain"`
-	ResolverHost string   `json:"resolverHost"`
-	Tcp          bool     `json:"tcp"`
-	Udp          bool     `json:"udp"`
-	ReporterURL  string   `json:"reporter"`
-	LocalAddress string   `json:"localAddress"`
-	Configs      []Config `json:"configs"`
+	Domain         string   `json:"domain"`
+	ResolverHost   string   `json:"resolverHost"`
+	Tcp            bool     `json:"tcp"`
+	Udp            bool     `json:"udp"`
+	ReporterURL    string   `json:"reporter"`
+	LocalAddress   string   `json:"localAddress"`
+	Configs        []Config `json:"configs"`
+	SmartConfig    []byte   `json:"smartConfig"`
+	SmartConfigURL url.URL  `json:"smartConfigURL"`
+	BlockedDomains []string `json:"blockedDomains"`
 }
 
 type Config struct {
