@@ -35,6 +35,8 @@ import (
 
 var debugLog log.Logger = *log.New(io.Discard, "", 0)
 
+// debugLog = *log.New(os.Stderr, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+
 // var errorLog log.Logger = *log.New(os.Stderr, "[ERROR] ", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 
 type connectivityReport struct {
@@ -183,32 +185,36 @@ func TestSingleConfig(setting *AppSettings, i int) {
 }
 
 func submitReports(setting *AppSettings) {
-	log.Println("Submitting reports...")
+	log.Println("Submitting all reports...")
+	var wg sync.WaitGroup // Create a WaitGroup instance
+	for i := range setting.Configs {
+		wg.Add(1)
+		sumbitOneReport(setting, i)
+	}
+	wg.Wait() // Wait for all goroutines to complete
+}
+
+func sumbitOneReport(setting *AppSettings, i int) {
+	var wg sync.WaitGroup
 	reporterURL := setting.ReporterURL
 	log.Printf("Reporter URL: %v", reporterURL)
-
-	var wg sync.WaitGroup // Create a WaitGroup instance
-
-	for i := range setting.Configs {
-		c := setting.Configs[i]
-		log.Printf("Config: %v", c)
-		for j := range c.TestReports {
-			wg.Add(1)                        // Increment the WaitGroup counter
-			go func(r *connectivityReport) { // Launch a goroutine
-				defer wg.Done() // Decrement the counter when the goroutine completes
-				err := collectReport(r, reporterURL)
-				if err != nil {
-					debugLog.Printf("Failed to collect report: %v\n", err)
-					r.Collected = false
-					return
-				}
-				log.Println("Report collected successfully")
-				r.Collected = true
-				log.Printf("Collecting report: %v", r)
-			}(c.TestReports[j])
-		}
+	c := setting.Configs[i]
+	log.Printf("Config: %v", c)
+	for j := range c.TestReports {
+		wg.Add(1)                        // Increment the WaitGroup counter
+		go func(r *connectivityReport) { // Launch a goroutine
+			defer wg.Done() // Decrement the counter when the goroutine completes
+			err := collectReport(r, reporterURL)
+			if err != nil {
+				debugLog.Printf("Failed to collect report: %v\n", err)
+				r.Collected = false
+				return
+			}
+			log.Println("Report collected successfully")
+			r.Collected = true
+			log.Printf("Collecting report: %v", r)
+		}(c.TestReports[j])
 	}
-
 	wg.Wait() // Wait for all goroutines to complete
 }
 
