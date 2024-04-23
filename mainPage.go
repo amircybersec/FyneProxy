@@ -227,6 +227,7 @@ func makeMainPageContent(ctx *AppContext, navChannel chan NavEvent) fyne.CanvasO
 	ConnectButton.OnTapped = func() {
 		log.Println(ConnectButton.Text)
 		TestSingleConfig(ctx.Settings, selectedItemID)
+		sumbitOneReport(ctx.Settings, selectedItemID)
 		list.Refresh()
 		var err error
 		//systemProxy, err := GetSystemProxy()
