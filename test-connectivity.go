@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/Jigsaw-Code/outline-sdk/dns"
+	"github.com/Jigsaw-Code/outline-sdk/transport"
 	"github.com/Jigsaw-Code/outline-sdk/x/config"
 	"github.com/Jigsaw-Code/outline-sdk/x/connectivity"
 	"github.com/Jigsaw-Code/outline-sdk/x/report"
@@ -115,6 +116,7 @@ func TestSingleConfig(setting *AppSettings, i int) {
 	if err != nil {
 		log.Fatalf("Failed to sanitize config: %v", err)
 	}
+	configparser := config.NewDefaultConfigParser()
 	// Clear previous test reports
 	// maybe make it atomic to prevent losing previous reports if test fails for any reason
 	// In other words, only clear the reports if the test is fully perfomed....
@@ -132,7 +134,7 @@ func TestSingleConfig(setting *AppSettings, i int) {
 			startTime := time.Now()
 			switch proto {
 			case "tcp":
-				streamDialer, err := config.NewStreamDialer(cnf.Transport)
+				streamDialer, err := configparser.WrapStreamDialer(&transport.TCPDialer{}, cnf.Transport)
 				r.Proto = "tcp"
 				log.Printf("testing for protocol: %v", r.Proto)
 				if err != nil {
@@ -145,7 +147,7 @@ func TestSingleConfig(setting *AppSettings, i int) {
 				}
 				resolver = dns.NewTCPResolver(streamDialer, resolverAddress)
 			case "udp":
-				packetDialer, err := config.NewPacketDialer(cnf.Transport)
+				packetDialer, err := configparser.WrapPacketDialer(&transport.UDPDialer{}, cnf.Transport)
 				r.Proto = "udp"
 				log.Printf("testing for protocol: %v", r.Proto)
 				if err != nil {
